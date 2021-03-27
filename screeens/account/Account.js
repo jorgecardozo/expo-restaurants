@@ -4,15 +4,17 @@ import firebase from 'firebase/app'
 
 import UserGuest from './UserGuest';
 import UserLogged from './UserLogged';
-import { getCurrentUser } from '../../utils/actions';
+import { isUserLogged } from '../../utils/actions';
 import Loading from '../../components/Loading';
 export default function Account() {
 
     const [login, setLogin] = useState(null)
 
     useEffect(() => {
-        const user = getCurrentUser()
-        user ? setLogin(true) : setLogin(false)
+        // const user = getCurrentUser()
+        // console.log("user",user)
+        // user ? setLogin(true) : setLogin(false)
+        setLogin(isUserLogged)
     }, [])
 
     console.log("ver la consola")
@@ -21,7 +23,7 @@ export default function Account() {
         return <Loading isVisible={true} text="cargando"/>
     }
 
-    return login ? <UserLogged/> : <UserGuest/>
+    return !login ? <UserLogged/> : <UserGuest/>
 }
 
 const styles = StyleSheet.create({})

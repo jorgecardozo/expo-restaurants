@@ -13,7 +13,3 @@ const firebaseConfig = {
   };
   // Initialize Firebase
   export const firebaseApp = firebase.initializeApp(firebaseConfig);
-
-  firebase.auth().onAuthStateChanged((user) => {
-    console.log("valor del login en firebase: ",user);
-})

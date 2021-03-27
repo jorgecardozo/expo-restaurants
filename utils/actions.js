@@ -1,20 +1,20 @@
 import { firebaseApp } from './firebase'
 import * as firebase from 'firebase'
 import 'firebase/firestore'
-// import '@firebase/auth'
+import 'firebase/auth'
 
 const db = firebase.firestore(firebaseApp)
 
-export const isUserLogged = () => {
+export const isUserLogged = async () => {
     let isLogged = false
-    firebase.auth().onAuthStateChanged((user) => {
+    await firebase.auth().onAuthStateChanged((user) => {
         user !== null && (isLogged = true)
     })
 
     return isLogged
 }
 
-export const getCurrentUser = () =>{
-    console.log("firebase: ", firebase.auth())
-    return firebase.auth().currentUser
+export const getCurrentUser = async function (){
+    console.log("wait: ",await firebase.auth().currentUser)
+    return await firebase.auth().currentUser
 }
