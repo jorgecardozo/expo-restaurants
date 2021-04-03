@@ -1,10 +1,12 @@
-import React , {useState} from 'react'
+import React , {useState, useEffect} from 'react'
 import { StyleSheet, Text, View, ScrollView, Alert, Dimensions} from 'react-native'
 import CountryPicker from 'react-native-country-picker-modal'
 import { Button, Input, Icon, Avatar, Image } from 'react-native-elements'
 import { map, size, filter } from 'lodash'
+import MapView from 'react-native-maps'
 
-import { loadImageFromGallery } from '../../utils/helpers'
+import { getCurrentLocation, loadImageFromGallery } from '../../utils/helpers'
+import Modal  from '../../components/Modal'
 
 const widthScreen = Dimensions.get("window").width
 
@@ -50,7 +52,72 @@ export default function AddRestaurantForm({toastRef, setLoading, navigation}) {
                 onPress={addRestaurant}
                 buttonStyle={styles.btnAddRestaurant}
             />
+            <MapRestaurant
+                isVisibleMap={isVisibleMap}
+                setIsVisibleMap={setIsVisibleMap}
+                setLocationRestaurant={setLocationRestaurant}
+                toastRef={toastRef}
+            />
         </ScrollView>
+    )
+}
+
+function MapRestaurant({ isVisibleMap, setIsVisibleMap, setLocationRestaurant, toastRef }) {
+    const [newRegion, setNewRegion] = useState(null)
+
+    useEffect(() => {
+        //Asincrono autoLlamado
+        (async() => {
+            const response = await getCurrentLocation()
+            if (response.status) {
+                setNewRegion(response.location)
+            }
+        })()
+    }, [])
+
+    const confirmLocation = () => {
+        setLocationRestaurant(newRegion)
+        toastRef.current.show("Localización guardada correctamente.", 3000)
+        setIsVisibleMap(false)
+    }
+
+    return (
+        <Modal isVisible={isVisibleMap} setVisible={setIsVisibleMap}>
+            <View>
+                {
+                    newRegion && (
+                        <MapView
+                            style={styles.mapStyle}
+                            initialRegion={newRegion}
+                            showsUserLocation={true}
+                            onRegionChange={(region) => setNewRegion(region)}
+                        >
+                            <MapView.Marker
+                                coordinate={{
+                                    latitude: newRegion.latitude,
+                                    longitude: newRegion.longitude
+                                }}
+                                draggable
+                            />
+                        </MapView>
+                    ) 
+                }
+                <View style={styles.viewMapBtn}>
+                    <Button
+                        title="Guardar Ubicación"
+                        containerStyle={styles.viewMapBtnContainerSave}
+                        buttonStyle={styles.viewMapBtnSave}
+                        onPress={confirmLocation}
+                    />
+                    <Button
+                        title="Cancelar Ubicación"
+                        containerStyle={styles.viewMapBtnContainerCancel}
+                        buttonStyle={styles.viewMapBtnCancel}
+                        onPress={() => setIsVisibleMap(false)}
+                    />
+                </View>
+            </View>
+        </Modal>
     )
 }
 
@@ -164,12 +231,12 @@ function FormAdd({
                 defaultValue={formData.address}
                 onChange={(e) => onChange(e, "address")}
                 errorMessage={errorAddress}
-                // rightIcon={{
-                //     type: "material-community",
-                //     name: "google-maps",
-                //     color: locationRestaurant ? "#442484" : "#c2c2c2",
-                //     onPress: () => setIsVisibleMap(true)
-                // }}
+                rightIcon={{
+                    type: "material-community",
+                    name: "google-maps",
+                    color: locationRestaurant ? "#442484" : "#c2c2c2",
+                    onPress: () => setIsVisibleMap(true)
+                }}
             />
             <Input
                 keyboardType="email-address"
