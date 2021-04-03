@@ -14,11 +14,11 @@ export default function RestaurantsStack() {
                 component={Restaurants}
                 options={{title: "Retaurantes"}}
             />
-            {/* <Stack.Screen
+            <Stack.Screen
                 name="add-restaurant"
                 component={AddRestaurant}
                 options={{title: "Crear Retaurante"}}
-            /> */}
+            />
         </Stack.Navigator>
     )
 }
