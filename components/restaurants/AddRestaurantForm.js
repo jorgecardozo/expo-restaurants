@@ -2,10 +2,10 @@ import React , {useState, useEffect} from 'react'
 import { StyleSheet, Text, View, ScrollView, Alert, Dimensions} from 'react-native'
 import CountryPicker from 'react-native-country-picker-modal'
 import { Button, Input, Icon, Avatar, Image } from 'react-native-elements'
-import { map, size, filter } from 'lodash'
+import { map, size, filter, isEmpty } from 'lodash'
 import MapView from 'react-native-maps'
 
-import { getCurrentLocation, loadImageFromGallery } from '../../utils/helpers'
+import { getCurrentLocation, loadImageFromGallery, validateEmail } from '../../utils/helpers'
 import Modal  from '../../components/Modal'
 
 const widthScreen = Dimensions.get("window").width
@@ -23,8 +23,62 @@ export default function AddRestaurantForm({toastRef, setLoading, navigation}) {
     const [locationRestaurant, setLocationRestaurant] = useState(null)
 
     const addRestaurant = () => {
+        if(!validForm()){
+            return
+        }
         console.log("Fuck Yeah")
     }
+
+    const validForm = () => {
+        clearErrors()
+        let isValid = true
+
+        if (isEmpty(formData.name)) {
+            setErrorName("Debes ingresar el nombre del restaurante.")
+            isValid = false
+        }
+
+        if (isEmpty(formData.address)) {
+            setErrorAddress("Debes ingresar la dirección del restaurante.")
+            isValid = false
+        }
+
+        if (!validateEmail(formData.email)) {
+            setErrorEmail("Debes ingresar un email de restaurante válido.")
+            isValid = false
+        }
+        
+        console.log("phone: ",size(formData.phone))
+
+        if(size(formData.phone) < 10) {
+            setErrorPhone("Debes ingresar un teléfono de restaurante válido.")
+            isValid = false
+        }
+
+        if (isEmpty(formData.description)) {
+            setErrorDescription("Debes ingresar una descripción del restaurante.")
+            isValid = false
+        }
+
+        if (!locationRestaurant) {
+            toastRef.current.show("Debes de localizar el restaurante en el mapa.", 3000)
+            isValid = false
+        } else if(size(imagesSelected) === 0) {
+            toastRef.current.show("Debes de agregar al menos una imagen al restaurante.", 3000)
+            isValid = false
+        }
+
+        return isValid
+    }
+
+    const clearErrors = () => {
+        setErrorAddress(null)
+        setErrorDescription(null)
+        setErrorEmail(null)
+        setErrorName(null)
+        setErrorPhone(null)
+    }
+
 
     return (
         <ScrollView style={styles.viewContainer}>
@@ -265,9 +319,9 @@ function FormAdd({
                     placeholder="WhatsApp del restaurante..."
                     keyboardType="phone-pad"
                     containerStyle={styles.inputPhone}
-                    // defaultValue={formData.phone}
-                    // onChange={(e) => onChange(e, "phone")}
-                    // errorMessage={errorPhone}
+                    defaultValue={formData.phone}
+                    onChange={(e) => onChange(e, "phone")}
+                    errorMessage={errorPhone}
                 />
             </View>
             <Input
